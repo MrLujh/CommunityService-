@@ -1,0 +1,13 @@
+platform :ios, '7.0'
+target ‘CommunityService’ do 
+  pod 'AFNetworking'
+  pod ‘MJRefresh’
+  pod ‘MJExtension’
+  pod ‘SDWebImage’
+  pod 'MBProgressHUD'
+  pod 'FMDB'
+  pod 'AMap3DMap'
+  pod 'AMapLocation'
+  pod 'AMapSearch'
+  pod 'Reachability'
+end   
