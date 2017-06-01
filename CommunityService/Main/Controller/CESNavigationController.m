@@ -15,20 +15,6 @@
 
 @implementation CESNavigationController
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
-{
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if (self) {
-        
-    }
-    return self;
-}
-
-- (UIStatusBarStyle)preferredStatusBarStyle
-{
-    return UIStatusBarStyleLightContent;
-}
-
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -47,11 +33,6 @@
     //    self.navigationBar.translucent = NO;
     [[UINavigationBar appearance] setBarTintColor:kNavigationBarBg];
     
-    //设置导航栏字体颜色
-    self.navigationBar.titleTextAttributes = @{NSForegroundColorAttributeName:[UIColor whiteColor], NSFontAttributeName:[UIFont systemFontOfSize:18]};
-    
-    //设置状态栏字体颜色
-    [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleLightContent;
     
     //导航栏
     UIButton *setBtn = [UIButton buttonWithType:UIButtonTypeCustom];

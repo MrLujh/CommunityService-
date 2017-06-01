@@ -232,4 +232,23 @@
 
 #define RGBACOLOR(r,g,b,a) [UIColor colorWithRed:(r)/255.0 green:(g)/255.0 blue:(b)/255.0 alpha:(a)]
 
+/**
+ 适配比例系数
+ */
+#define ScaleWidth [[UIScreen mainScreen] bounds].size.width/375.0
+
+#define kBaseLine(a) (CGFloat)a * SCREEN_WIDTH / 375.0
+
+#define SCREEN_WIDTH [UIScreen mainScreen].bounds.size.width
+#define SCREEN_HEIGHT [UIScreen mainScreen].bounds.size.height
+
+#define COLORA(R,G,B,A) [UIColor colorWithRed:(R)/255.0 green:(G)/255.0 blue:(B)/255.0 alpha:A]
+#define COLOR(R,G,B) COLORA(R,G,B,1.0)
+
+/** 边框*/
+#define ViewBorder(View,Width,Color)\
+\
+[View.layer setBorderWidth:(Width)];\
+[View.layer setBorderColor:[Color CGColor]]
+
 #endif

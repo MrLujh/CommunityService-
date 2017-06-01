@@ -1,6 +1,6 @@
 platform :ios, '7.0'
 target ‘CommunityService’ do 
-  pod 'AFNetworking'
+  pod 'AFNetworking','2.3'
   pod ‘MJRefresh’
   pod ‘MJExtension’
   pod ‘SDWebImage’
@@ -10,4 +10,6 @@ target ‘CommunityService’ do
   pod 'AMapLocation'
   pod 'AMapSearch'
   pod 'Reachability'
+  pod 'SDCycleScrollView'
+  pod 'Masonry'
 end   

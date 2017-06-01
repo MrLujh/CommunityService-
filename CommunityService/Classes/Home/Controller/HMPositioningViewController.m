@@ -14,7 +14,7 @@
 #import "SGInfoAlert.h"
 #import "FMDBPositioningManager.h"
 #define TipPlaceHolder @"名称"
-#define BusLinePaddingEdge 20
+#define BusLinePaddingEdge 20d
 
 @interface HMPositioningViewController ()<AMapLocationManagerDelegate, AMapSearchDelegate, UISearchBarDelegate, UISearchResultsUpdating, UITableViewDataSource, UITableViewDelegate>
 
@@ -56,6 +56,7 @@
     
     // 加载本地搜索记录
     [self loadKeyword];
+    
     
 }
 
@@ -257,6 +258,7 @@
         
         NSString *longitude = [NSString stringWithFormat:@"%f",location.coordinate.longitude];
         NSString *latitude = [NSString stringWithFormat:@"%f",location.coordinate.latitude];
+        NSLog(@"latitude == %@",latitude);
         
         if ([kHomeViewController isEqualToString:self.isFrom]) {
             
@@ -313,6 +315,8 @@
         NSString *neighborhood = regeocode.addressComponent.neighborhood;
         
         NSString *address = [NSString stringWithFormat:@"%@%@%@",district,township,neighborhood];
+        
+        NSLog(@"%@",address);
         
         if ([kHomeViewController isEqualToString:self.isFrom]) {
             

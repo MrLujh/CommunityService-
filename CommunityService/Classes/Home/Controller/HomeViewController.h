@@ -30,4 +30,11 @@
 // tablev的头视图
 @property (nonatomic, strong) UIView *headerView;
 
+// banerScrollView
+@property (nonatomic, strong) UIScrollView *banerScrollView;
+// collectionView
+@property (nonatomic, strong) UICollectionView *collectionView;
+// collectionView
+@property (nonatomic, strong)  SDCycleScrollView *cycleScrollView;
+
 @end

@@ -9,5 +9,8 @@
 #import <UIKit/UIKit.h>
 
 @interface CESBaseViewController : UIViewController
+- (void)showLoading:(BOOL)isLoading;
+- (void)backAction;
+- (NSString*)getFilePath:(NSString*)filename;
 
 @end

@@ -1,5 +1,6 @@
 // UIProgressView+AFNetworking.h
-// Copyright (c) 2011–2016 Alamofire Software Foundation ( http://alamofire.org/ )
+//
+// Copyright (c) 2013-2014 AFNetworking (http://afnetworking.com)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,17 +22,16 @@
 
 #import <Foundation/Foundation.h>
 
-#import <TargetConditionals.h>
+#import <Availability.h>
 
-#if TARGET_OS_IOS || TARGET_OS_TV
+#if defined(__IPHONE_OS_VERSION_MIN_REQUIRED)
 
 #import <UIKit/UIKit.h>
 
-NS_ASSUME_NONNULL_BEGIN
-
+@class AFURLConnectionOperation;
 
 /**
- This category adds methods to the UIKit framework's `UIProgressView` class. The methods in this category provide support for binding the progress to the upload and download progress of a session task.
+ This category adds methods to the UIKit framework's `UIProgressView` class. The methods in this category provide support for binding the progress to the upload and download progress of a session task or request operation.
  */
 @interface UIProgressView (AFNetworking)
 
@@ -41,12 +41,14 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Binds the progress to the upload progress of the specified session task.
-
+ 
  @param task The session task.
  @param animated `YES` if the change should be animated, `NO` if the change should happen immediately.
  */
+#if __IPHONE_OS_VERSION_MIN_REQUIRED >= 70000
 - (void)setProgressWithUploadProgressOfTask:(NSURLSessionUploadTask *)task
                                    animated:(BOOL)animated;
+#endif
 
 /**
  Binds the progress to the download progress of the specified session task.
@@ -54,11 +56,33 @@ NS_ASSUME_NONNULL_BEGIN
  @param task The session task.
  @param animated `YES` if the change should be animated, `NO` if the change should happen immediately.
  */
+#if __IPHONE_OS_VERSION_MIN_REQUIRED >= 70000
 - (void)setProgressWithDownloadProgressOfTask:(NSURLSessionDownloadTask *)task
                                      animated:(BOOL)animated;
+#endif
+
+///------------------------------------
+/// @name Setting Session Task Progress
+///------------------------------------
+
+/**
+ Binds the progress to the upload progress of the specified request operation.
+
+ @param operation The request operation.
+ @param animated `YES` if the change should be animated, `NO` if the change should happen immediately.
+ */
+- (void)setProgressWithUploadProgressOfOperation:(AFURLConnectionOperation *)operation
+                                        animated:(BOOL)animated;
+
+/**
+ Binds the progress to the download progress of the specified request operation.
+
+ @param operation The request operation.
+ @param animated `YES` if the change should be animated, `NO` if the change should happen immediately.
+ */
+- (void)setProgressWithDownloadProgressOfOperation:(AFURLConnectionOperation *)operation
+                                          animated:(BOOL)animated;
 
 @end
-
-NS_ASSUME_NONNULL_END
 
 #endif

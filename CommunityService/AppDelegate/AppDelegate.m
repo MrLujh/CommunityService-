@@ -20,10 +20,14 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     
+    // 初始化高德地图
     [AMapServices sharedServices].apiKey = @"289a6c9429edaa6b8e4659e6fabeaf11";
     
     [AMapServices sharedServices].enableHTTPS = YES;
-
+    
+    // 获得用户经纬度信息
+    [self getUserLongitudeAndLatitudeData];
+    
     // 创建窗口
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     
@@ -72,7 +76,7 @@
         [self getIdentifierWhenNoLogin];
         
     }
-
+    
     return YES;
 
 }
@@ -216,6 +220,100 @@
     }
     
 }
+
+#pragma mark -获得用户经纬度信息 
+
+- (void)getUserLongitudeAndLatitudeData {
+
+    //高德定位
+    self.locationManager = [[AMapLocationManager alloc] init];
+    self.locationManager.delegate = self;
+    
+    //AMapSearchAPI
+    self.amapSearchAPI = [[AMapSearchAPI alloc] init];
+    self.amapSearchAPI.delegate = self;
+
+    [self.locationManager startUpdatingLocation];
+}
+
+#pragma mark -AMapLocationManager delegate
+
+- (void)amapLocationManager:(AMapLocationManager *)manager didFailWithError:(NSError *)error{
+    
+    DLog(@"定位失败：%@",error);
+    
+    
+}
+
+- (void)amapLocationManager:(AMapLocationManager *)manager didUpdateLocation:(CLLocation *)location{
+    
+    if (location != nil) {
+        
+        [self.locationManager stopUpdatingLocation];
+        
+        NSString *longitude = [NSString stringWithFormat:@"%f",location.coordinate.longitude];
+        NSString *latitude = [NSString stringWithFormat:@"%f",location.coordinate.latitude];
+    
+            [CESGetUserMessage saveCurrentLongitude:longitude];
+            
+            [CESGetUserMessage saveCurrentLatitude:latitude];
+            
+        self.amapSearchAPI = [[AMapSearchAPI alloc] init];
+        self.amapSearchAPI.delegate = self;
+        //构造AMapReGeocodeSearchRequest对象
+        AMapReGeocodeSearchRequest *regeo = [[AMapReGeocodeSearchRequest alloc] init];
+        
+        CGFloat lat = location.coordinate.latitude;
+        CGFloat lon = location.coordinate.longitude;
+        
+        AMapGeoPoint *point = [AMapGeoPoint locationWithLatitude:lat longitude:lon];
+        
+        regeo.location = point;
+        regeo.radius = 1000;
+        regeo.requireExtension = YES;
+        
+        //发起逆地理编码
+        [self.amapSearchAPI AMapReGoecodeSearch: regeo];
+        
+    }
+    
+}
+
+#pragma mark -AMapSearchDelegate
+
+- (void)onReGeocodeSearchDone:(AMapReGeocodeSearchRequest *)request response:(AMapReGeocodeSearchResponse *)response
+{
+    if(response.regeocode != nil)
+    {
+        DLog(@"LocationViewController onReGeocodeSearchDone :%@",response.regeocode);
+        
+        //通过AMapReGeocodeSearchResponse对象处理搜索结果
+        
+        AMapReGeocode *regeocode = response.regeocode;
+        
+        NSString *district = regeocode.addressComponent.district;
+        
+        NSString *township = regeocode.addressComponent.township;
+        
+        NSString *neighborhood = regeocode.addressComponent.neighborhood;
+        
+        NSString *address = [NSString stringWithFormat:@"%@%@%@",district,township,neighborhood];
+        
+        [CESGetUserMessage saveLocationAddress:address];
+        
+    }
+}
+
+- (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url {
+    
+    return  [WXApi handleOpenURL:url delegate:[WXApiManager sharedManager]];
+}
+
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
+    
+    return [WXApi handleOpenURL:url delegate:[WXApiManager sharedManager]];
+}
+
 
 - (void)applicationWillResignActive:(UIApplication *)application {
     // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.

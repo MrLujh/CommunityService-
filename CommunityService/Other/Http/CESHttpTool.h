@@ -5,10 +5,20 @@
 //  Created by 家浩 on 2016/12/12.
 //  Copyright © 2016年 卢家浩. All rights reserved.
 //
+typedef  void (^RequestFinishBlock)(id data);
+typedef  void (^RequestFailureBlock)(NSError *error);
 
 #import <Foundation/Foundation.h>
 
 @interface CESHttpTool : NSObject
+/*
+ * params的value进行了json格式化
+ */
++ (void)requestWithURL:(NSString*)urlStr
+                params:(NSMutableDictionary*)params
+            httpMethod:(NSString*)httpMethod
+         completeBlock:(RequestFinishBlock)sucessBlock
+           failedBlock:(RequestFailureBlock)failedBlock;
 
 /**
  *  发送get请求

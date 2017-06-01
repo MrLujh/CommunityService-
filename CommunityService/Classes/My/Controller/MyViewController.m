@@ -31,8 +31,7 @@
 
 - (void)btnClick {
 
-    MapViewController *mapVC = [[MapViewController alloc] init];
-    [self.navigationController pushViewController:mapVC animated:YES];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"A" object:nil];
 
 }
 

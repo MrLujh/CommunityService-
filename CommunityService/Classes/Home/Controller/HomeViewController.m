@@ -5,14 +5,22 @@
 //  Created by 家浩 on 2016/12/10.
 //  Copyright © 2016年 卢家浩. All rights reserved.
 //
-#define TableViewSectionHeaderHeight 246
+#define TableViewSectionHeaderHeight 636
 
 #import "HomeViewController.h"
 #import "HMPositioningViewController.h"
 #import "CESNavigationController.h"
 #import "MenuDownView.h"
-@interface HomeViewController ()<UITableViewDelegate,UITableViewDataSource,UIScrollViewDelegate,RefreshLocationDelegate,MenuDropViewDelegate>
+#import "ServiceNormalCell.h"
+#import "ServiceOnePicCell.h"
+#import "ServiceLeftPicCell.h"
+#import "ServicePicTwoTitleCell.h"
+#import "HeaderCollectionViewCell.h"
+#import "HeaderReusableView.h"
+#import "FooterReusableView.h"
+#import "CollectionViewLayout.h"
 
+@interface HomeViewController ()<UITableViewDelegate,UITableViewDataSource,UIScrollViewDelegate,UICollectionViewDelegate, UICollectionViewDataSource,RefreshLocationDelegate,MenuDropViewDelegate,SDCycleScrollViewDelegate, CollectionViewLayoutDelegate>
 
 @end
 
@@ -20,11 +28,17 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
+
     self.automaticallyAdjustsScrollViewInsets = NO;
     
     // 初始化tableView
     [self setupTableView];
+    
+    // 初始化轮播图
+    [self setupBanerScrollview];
+    
+    // 初始化UICollectionView
+    [self setupUICollectionView];
     
     // 初始化navigationBar
     [self setupNavigationBar];
@@ -71,21 +85,67 @@
     
     // tableView头视图
     _headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, KUIScreenWidth, TableViewSectionHeaderHeight)];
-    _headerView.backgroundColor = [UIColor cyanColor];
+    _headerView.backgroundColor = [UIColor greenColor];
     self.tableView.tableHeaderView = _headerView;
+}
+
+#pragma mark -初始化轮播图
+
+- (void)setupBanerScrollview {
+
+    NSArray *imageNames = @[@"1",
+                            @"2",
+                            @"3",
+                            @"4",
+                            @"4",
+                            @"5",
+                            @"6",
+                            @"7"
+                            ];
+    
+    // 本地加载 --- 创建不带标题的图片轮播器
+    self.cycleScrollView = [SDCycleScrollView cycleScrollViewWithFrame:CGRectMake(0, 0, KUIScreenWidth, 180) shouldInfiniteLoop:YES imageNamesGroup:imageNames];
+    self.cycleScrollView.delegate = self;
+    self.cycleScrollView.pageControlStyle = SDCycleScrollViewPageContolStyleAnimated;
+    self.cycleScrollView.currentPageDotColor = [UIColor orangeColor];
+    [_headerView addSubview:self.cycleScrollView];
+    self.cycleScrollView.scrollDirection = UICollectionViewScrollDirectionHorizontal;
+
+}
+
+#pragma mark -初始化UICollectionView
+
+- (void)setupUICollectionView {
+    
+    CollectionViewLayout *layout = [[CollectionViewLayout alloc]init];
+    layout.delegate = self;
+    
+    self.collectionView = [[UICollectionView alloc]initWithFrame:CGRectMake(0, self.cycleScrollView.bottom, KUIScreenWidth, 456) collectionViewLayout:layout];
+    self.collectionView.showsVerticalScrollIndicator = YES;
+    self.collectionView.backgroundColor = [UIColor whiteColor];
+    self.collectionView.delegate = self;
+    self.collectionView.dataSource = self;
+    [_headerView addSubview:self.collectionView];
+    
+    [self.collectionView registerClass:[HeaderCollectionViewCell class] forCellWithReuseIdentifier:@"HeaderCollectionViewCell"];
+    [self.collectionView registerClass:[ServiceNormalCell class] forCellWithReuseIdentifier:@"ServiceNormalCell"];
+    [self.collectionView registerClass:[ServiceOnePicCell class] forCellWithReuseIdentifier:@"ServiceOnePicCell"];
+    [self.collectionView registerClass:[ServicePicTwoTitleCell class] forCellWithReuseIdentifier:@"ServicePicTwoTitleCell"];
+    [self.collectionView registerClass:[ServiceLeftPicCell class] forCellWithReuseIdentifier:@"ServiceLeftPicCell"];
+    
+    
+    [self.collectionView registerClass:[HeaderReusableView class] forSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:@"ServiceHeaderReusableView"];
+    [self.collectionView registerClass:[FooterReusableView class] forSupplementaryViewOfKind:UICollectionElementKindSectionFooter withReuseIdentifier:@"ServiceFooterReusableView"];
 }
 
 #pragma mark -初始化navigationBar
 
 - (void)setupNavigationBar {
     
-    
     // 导航栏背景view
     _navigationBackView = [[UIView alloc] init];
     _navigationBackView.frame = CGRectMake(0, 0, KUIScreenWidth, 64);
     [self.view addSubview:_navigationBackView];
-    
-//    [self.navigationController.navigationBar setBackgroundImage:[UIImage imageNamed:@"88px透明.png"] forBarMetrics:UIBarMetricsDefault];
     
     //左侧搜索按钮
     _searchButton = [[UIButton alloc] initWithFrame:CGRectMake(20, 17, 30, 30)];
@@ -106,7 +166,7 @@
     _locationLabel = [[UILabel alloc] initWithFrame:CGRectMake(-(KUIScreenWidth-45), 17, KUIScreenWidth-80, 30)];
     _locationLabel.layer.cornerRadius = 15;
     _locationLabel.layer.masksToBounds = YES;
-    _locationLabel.text = @"上地";
+    _locationLabel.text = [NSString stringWithFormat:@"%@",[CESGetUserMessage getLocationAddress]];
     _locationLabel.textAlignment = NSTextAlignmentCenter;
     _locationLabel.font = Theme_Font_16;
     [_navigationBackView addSubview:_locationLabel];
@@ -121,11 +181,9 @@
     [_emailButton setBackgroundImage:[UIImage imageNamed:@"home_email_black"] forState:UIControlStateNormal];
     [_navigationBackView addSubview:_emailButton];
     
-    
 }
 
 #pragma mark -UITableViewDataSource
-
 
 -(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
 {
@@ -196,6 +254,94 @@
     cell.alpha = 1;
     cell.layer.shadowOffset = CGSizeMake(0, 0);
     [UIView commitAnimations];
+    
+}
+
+#pragma mark -UICollectionViewDataSource
+
+- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
+    return 2;
+}
+
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
+    if (section == 0) {
+        
+        return 1;
+        
+    }else {
+        
+        return 3;
+        
+    }
+}
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
+    
+    if (indexPath.section == 0) {
+        
+        HeaderCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"HeaderCollectionViewCell" forIndexPath:indexPath];
+        
+        return cell;
+    }
+    
+    switch (indexPath.section) {
+        
+        case 1:
+            if (indexPath.item == 0) {
+                ServicePicTwoTitleCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"ServicePicTwoTitleCell" forIndexPath:indexPath];
+                return cell;
+            } else {
+                ServiceLeftPicCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"ServiceLeftPicCell" forIndexPath:indexPath];
+                return cell;
+            }
+            break;
+            
+        default:
+            return [UICollectionViewCell new];
+            break;
+    }
+}
+
+- (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath {
+    
+    if (kind == UICollectionElementKindSectionHeader) {
+        
+        HeaderReusableView *headerView = [collectionView dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:@"ServiceHeaderReusableView" forIndexPath:indexPath];
+        headerView.imgView.image = [UIImage imageNamed:@"ser_b1"];
+        return headerView;
+    } else {
+        FooterReusableView *footerView = [collectionView dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:@"ServiceFooterReusableView" forIndexPath:indexPath];
+        return footerView;
+    }
+}
+
+- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
+    
+    NSInteger row = indexPath.row;
+    
+    NSInteger section = indexPath.section;
+    
+    NSLog(@"section =%lu  row =%lu",section ,row);
+    
+}
+
+
+#pragma mark -CollectionViewLayoutDelegate
+
+-(CGFloat)heightOfSectionFooterForIndexPath:(NSIndexPath *)indexPath {
+    return 15;
+}
+
+-(CGFloat)heightOfSectionHeaderForIndexPath:(NSIndexPath *)indexPath {
+    
+    if (indexPath.section == 0) {
+        
+        return 0;
+        
+    }else {
+        
+        return 50;
+    }
     
 }
 
@@ -337,6 +483,14 @@
     hmpositionVC.isFrom = kHomeViewController;
     [self.navigationController presentViewController:nav animated:YES completion:nil];
     
+}
+
+#pragma mark -SDCycleScrollViewDelegate
+
+- (void)cycleScrollView:(SDCycleScrollView *)cycleScrollView didSelectItemAtIndex:(NSInteger)index
+{
+    NSLog(@"---点击了第%ld张图片", (long)index);
+
 }
 
 @end
